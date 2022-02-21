@@ -1,3 +1,6 @@
+//Dennis Audu
+//148463193
+//daudu@myseneca
 #include <iostream>
 #include<iomanip>
 #include"TcpPacketParser.h"
@@ -7,7 +10,7 @@ const int MAX_LEN = 1500;//The maximum length of a TCP packet could be up to 655
 const int HEADER_LEN = 22;//The length of the packet header
 
 bool TcpPacketParser::parse(const char* packet) {
-	bool retval;
+	bool retval = false;
 	if (packet == nullptr) return false;
 
 	//source port
@@ -23,21 +26,21 @@ bool TcpPacketParser::parse(const char* packet) {
 
 	//sequence Number
 	++packet;
-	this->sequence_num = (*packet) * 0x1000000;
-	packet;
-	 this->sequence_num = (*packet) * 0x10000;
+	this->sequence_num += (*packet) * 0x1000000;
+	++packet;
+	 this->sequence_num += (*packet) * 0x10000;
 	 ++packet;
-	this->sequence_num = (*packet) * 0x100;
+	this->sequence_num += (*packet) * 0x100;
 	 ++packet;
 	 this->sequence_num += *packet;
 	
 	//acknolegement number;
 	 ++packet;
-	 this->ack_num = (*packet) * 0x1000000;
-	 packet;
-	 this->ack_num = (*packet) * 0x10000;
+	 this->ack_num += (*packet) * 0x1000000;
 	 ++packet;
-	 this->ack_num = (*packet) * 0x100;
+	 this->ack_num += (*packet) * 0x10000;
+	 ++packet;
+	 this->ack_num += (*packet) * 0x100;
 	 ++packet;
 	 this->ack_num += *packet;
 
@@ -49,7 +52,7 @@ bool TcpPacketParser::parse(const char* packet) {
 	++packet;
 	this->ignore = (*packet) * 0x0100;
 	++packet;
-	this->ignore = *packet;
+	this->ignore += *packet;
 
 	//check sum
 	++packet;
@@ -61,7 +64,7 @@ bool TcpPacketParser::parse(const char* packet) {
 	++packet;
 	this->ignore2 = (*packet) * 0x0100;
 	++packet;
-	this->ignore2 = *packet;
+	this->ignore2 += *packet;
 
 	//length
 	++packet;
@@ -73,10 +76,11 @@ bool TcpPacketParser::parse(const char* packet) {
 	Mychecksum = sourcePort + destPort + sequence_num + ack_num + length + ignore + ignore2;
 	if (Mychecksum == this->checksum) retval = true;
 
+	++packet;
 	//data
 	if (retval = true) {
 		this->data = new unsigned char[length + 1];
-		memcpy(this->data, packet + HEADER_LEN, length + 1);
+		memcpy(this->data, packet, strlen(packet)+1);
 		this->data[length] = '\0';
 	}
 
@@ -84,6 +88,7 @@ bool TcpPacketParser::parse(const char* packet) {
 }
 
 void TcpPacketParser::display(std::ostream& os)const {
+	os << endl;
 	os << "Report for UDP Packet Parser" << endl;
 	os << setw(13) << left << "Source port: " << this->sourcePort << endl;
 	os << setw(13) << left << "Dest port: " << this->destPort << endl;
@@ -103,4 +108,5 @@ TcpPacketParser::~TcpPacketParser() {
 	length = 0;
 	checksum = 0;
 	data = nullptr;
+	delete[] data;
 }

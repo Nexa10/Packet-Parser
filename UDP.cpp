@@ -1,3 +1,6 @@
+//Dennis Audu
+//148463193
+//daudu@myseneca
 #include <iostream>
 #include"UdpPacketParser.h"
 #include<iomanip>
@@ -6,7 +9,7 @@ const int MAX_LEN = 65535;//The maximum length of a UDP packet could be up to 65
 const int HEADER_LEN = 8;//The length of the packet header
 
 bool UdpPacketParser::parse(const char* packet) {
-	bool retval;
+	bool retval = false;
 	if (packet == nullptr) return false;
 
 	this->sourcePort = (*packet) * 0x0100;
@@ -32,9 +35,10 @@ bool UdpPacketParser::parse(const char* packet) {
 	Mychecksum = sourcePort + destPort + length;
 	if (Mychecksum == checksum) retval = true;
 
+	++packet;
 	if (retval = true) {
 		this->data = new unsigned char[length + 1];
-		memcpy(this->data, packet + HEADER_LEN, length + 1);
+		memcpy(this->data, packet, strlen(packet)+1);
 		this->data[length] = '\0';
 	}
 
@@ -42,6 +46,7 @@ bool UdpPacketParser::parse(const char* packet) {
 }
 
 void UdpPacketParser::display(std::ostream& os)const {
+	os << endl;
 	os << "Report for UDP Packet Parser" << endl;
 	os << setw(13) << left << "Source port: " << this->sourcePort << endl;
 	os << setw(13) << left << "Dest port: " << this->destPort << endl;
@@ -55,4 +60,5 @@ UdpPacketParser::~UdpPacketParser() {
 	length = 0;
 	checksum = 0;
 	data = nullptr;
+	delete[] data;
 }

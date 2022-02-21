@@ -14,9 +14,5 @@ public:
 
 std::ostream& operator<<(std::ostream& os, PacketParser& parser);
 
-std::ostream& operator<<(std::ostream& os, PacketParser& parser) {
-	parser.display(os);
-	return os;
-}
 
 #endif// _PACKETPARSER_H_
